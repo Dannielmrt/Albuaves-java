@@ -14,7 +14,7 @@ Cliente web mostrando la lista de avistamientos y aves cargada desde el servidor
 ### B. Java ejecutándose en la terminal
 Aquí se ve el cliente de escritorio (Java) conectándose a la misma API y mostrando los datos en texto.
 
-![Captura de la Terminal Java](./capturas/Java-terminal.png)
+![Captura de la Terminal Java](./capturas/java-terminal.png)
 
 ---
 
