@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albuaves | Field Notebook</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root { 
+            --primary: #2c7a7b; /* Teal color */
+            --bg: #f7fafc;      /* Light gray background */
+            --text: #2d3748;    /* Dark gray text */
+            --danger: #e53e3e;  /* Red for delete actions */
+        }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); }
+
+        /* --- NAVBAR STYLES --- */
+        .navbar { background: var(--primary); padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-links button { background: none; border: none; color: white; font-size: 1rem; margin-left: 15px; cursor: pointer; opacity: 0.7; padding-bottom: 5px; transition: opacity 0.3s; }
+        .nav-links button:hover, .nav-links button.active { opacity: 1; border-bottom: 2px solid white; font-weight: bold; }
+
+        /* --- LAYOUT CONTAINER --- */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
+        
+        /* View Sections (Tabs) */
+        .view-section { display: none; } /* Hidden by default */
+        .view-section.active { display: block; animation: fadeIn 0.4s; } /* Visible when active */
+
+        /* --- FORM STYLES --- */
+        .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .form-header { margin-top: 0; color: var(--primary); border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #4a5568; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; }
+        .form-group input:focus { border-color: var(--primary); outline: none; }
+        
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 1rem; font-weight: bold; transition: background 0.2s; }
+        .btn-submit:hover { filter: brightness(110%); }
+
+        /* --- CARD GRID STYLES --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        
+        .card-img { width: 100%; height: 200px; object-fit: cover; background: #e2e8f0; }
+        .card-body { padding: 20px; }
+        .card h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.25rem; }
+        
+        /* Typography for details */
+        .meta { color: #718096; font-size: 0.9rem; font-style: italic; margin-bottom: 12px; display: block; }
+        .desc { color: #4a5568; line-height: 1.5; font-size: 0.95rem; }
+
+        /* --- DELETE BUTTON (FIXED) --- */
+        .btn-delete { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: var(--danger); 
+            color: white; 
+            border: none; 
+            width: 35px;          /* Fixed width */
+            height: 35px;         /* Fixed height */
+            border-radius: 50%;   /* Perfect circle */
+            cursor: pointer; 
+            display: flex;        /* Flexbox for centering */
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            font-size: 1.1rem;    /* Icon size */
+            padding: 0;           /* Remove default padding */
+            line-height: 1;       /* Fix vertical alignment */
+        }
+        .btn-delete:hover { transform: scale(1.1); background: #c53030; }
+
+        /* Sighting specific styles */
+        .info-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px; border-top: 1px solid #edf2f7; padding-top: 8px; color: #718096; }
+        .info-row strong { color: var(--text); }
+
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">🦅 Albuaves</div>
+        <div class="nav-links">
+            <button onclick="switchView('birds')" id="btn-birds" class="active">Birds Catalog</button>
+            <button onclick="switchView('sightings')" id="btn-sightings">Sightings Log</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div id="view-birds" class="view-section active">
+            <div class="form-box">
+                <h3 class="form-header">Add New Species</h3>
+                <form onsubmit="saveData(event, 'birds')">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Common Name</label>
+                            <input type="text" id="b_common" required placeholder="e.g. Kingfisher">
+                        </div>
+                        <div class="form-group">
+                            <label>Scientific Name</label>
+                            <input type="text" id="b_sci" placeholder="e.g. Alcedo atthis">
+                        </div>
+                        <div class="form-group">
+                            <label>Image URL</label>
+                            <input type="text" id="b_img" placeholder="img/bird.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="b_desc" placeholder="Brief description...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Save Species</button>
+                </form>
+            </div>
+            <div id="grid-birds" class="grid">Loading...</div>
+        </div>
+
+        <div id="view-sightings" class="view-section">
+            <div class="form-box">
+                <h3 class="form-header">Log New Sighting</h3>
+                <form onsubmit="saveData(event, 'sightings')">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Which bird did you see?</label>
+                            <select id="s_bird_id" required><option>Loading birds...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="s_loc" required placeholder="e.g. Rice fields">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="s_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="s_time" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Photo (Optional)</label>
+                            <input type="text" id="s_img" placeholder="img/sighting.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <input type="text" id="s_com" placeholder="Behavior observed...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Log Sighting</button>
+                </form>
+            </div>
+            <div id="grid-sightings" class="grid">Loading...</div>
+        </div>
+
+    </div>
+
+    <script>
+        // API Endpoint (Relative path)
+        const API_URL = 'api.php';
+
+        /**
+         * SWITCH TABS
+         * Handles the visibility toggle between Birds and Sightings views.
+         */
+        function switchView(view) {
+            // 1. Reset active classes
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
+            
+            // 2. Activate selected view
+            document.getElementById(`view-${view}`).classList.add('active');
+            document.getElementById(`btn-${view}`).classList.add('active');
+            
+            // 3. Load data for the selected view
+            if (view === 'birds') loadBirds();
+            if (view === 'sightings') { 
+                loadBirdOptions(); // Refresh dropdown
+                loadSightings();   // Refresh grid
+            }
+        }
+
+        /**
+         * READ: FETCH BIRDS
+         * Gets the list of birds from the API and renders cards.
+         */
+        async function loadBirds() {
+            try {
+                const res = await fetch(`${API_URL}?type=birds`);
+                const data = await res.json();
+                const div = document.getElementById('grid-birds');
+                
+                div.innerHTML = data.map(b => `
+                    <div class="card">
+                        <button class="btn-delete" title="Delete" onclick="deleteItem(${b.bird_id}, 'birds')">🗑</button>
+                        <img src="${cleanPath(b.img_url)}" class="card-img" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                        <div class="card-body">
+                            <h3>${b.common_name}</h3>
+                            <span class="meta">${b.scientific_name}</span>
+                            <p class="desc">${b.description || 'No description available.'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { console.error("Error loading birds:", error); }
+        }
+
+        /**
+         * READ: FETCH SIGHTINGS
+         * Gets the list of sightings (joined with bird names) and renders cards.
+         */
+        async function loadSightings() {
+            try {
+                const res = await fetch(`${API_URL}?type=sightings`);
+                const data = await res.json();
+                const div = document.getElementById('grid-sightings');
+
+                if (data.length === 0) { 
+                    div.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #718096;">No sightings recorded yet.</p>'; 
+                    return; 
+                }
+
+                div.innerHTML = data.map(s => `
+                    <div class="card">
+                        <button class="btn-delete" title="Delete" onclick="deleteItem(${s.sighting_id}, 'sightings')">🗑</button>
+                        <img src="${cleanPath(s.img_url)}" class="card-img" onerror="this.src='https://via.placeholder.com/300?text=Sighting'">
+                        <div class="card-body">
+                            <h3>${s.common_name || 'Unknown Bird'}</h3>
+                            <div class="info-row">
+                                <span>📍 ${s.location}</span>
+                                <strong>${s.date}</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>📝 "${s.comments}"</span>
+                                <strong>${s.time}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { console.error("Error loading sightings:", error); }
+        }
+
+        /**
+         * HELPER: LOAD DROPDOWN
+         * Populates the <select> element with available birds for the sighting form.
+         */
+        async function loadBirdOptions() {
+            const res = await fetch(`${API_URL}?type=birds`);
+            const data = await res.json();
+            const select = document.getElementById('s_bird_id');
+            select.innerHTML = data.map(b => `<option value="${b.bird_id}">${b.common_name}</option>`).join('');
+        }
+
+        /**
+         * CREATE: SAVE DATA (POST)
+         * Handles form submissions for both Birds and Sightings.
+         */
+        async function saveData(e, type) {
+            e.preventDefault(); // Stop page reload
+            let data = {};
+
+            // Collect data based on form type
+            if (type === 'birds') {
+                data = {
+                    common_name: document.getElementById('b_common').value,
+                    scientific_name: document.getElementById('b_sci').value,
+                    description: document.getElementById('b_desc').value,
+                    img_url: document.getElementById('b_img').value
+                };
+            } else {
+                data = {
+                    bird_id: document.getElementById('s_bird_id').value,
+                    location: document.getElementById('s_loc').value,
+                    date: document.getElementById('s_date').value,
+                    time: document.getElementById('s_time').value,
+                    img_url: document.getElementById('s_img').value,
+                    comments: document.getElementById('s_com').value
+                };
+            }
+
+            // Send POST request
+            await fetch(`${API_URL}?type=${type}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            // Cleanup: Reset form and refresh list
+            e.target.reset();
+            type === 'birds' ? loadBirds() : loadSightings();
+        }
+
+        /**
+         * DELETE: REMOVE ITEM
+         * Sends a DELETE request to the API by ID.
+         */
+        async function deleteItem(id, type) {
+            if(!confirm("Are you sure you want to delete this item?")) return;
+
+            await fetch(`${API_URL}?type=${type}&id=${id}`, { method: 'DELETE' });
+            type === 'birds' ? loadBirds() : loadSightings();
+        }
+
+        /**
+         * UTILITY: CLEAN PATH
+         * Removes relative prefixes ('../') to ensure images load correctly.
+         */
+        function cleanPath(p) { return p ? p.replace('../', '') : ''; }
+
+        // Initial Load
+        loadBirds();
+    </script>
+</body>
+</html>
