@@ -1,14 +1,9 @@
 <?php
-// api.php - REST API for Birds and Sightings
-// Handles GET, POST, and DELETE requests.
 
-// 1. CONFIGURATION
-// Set headers to return JSON and allow Cross-Origin requests (CORS)
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
 
-// 2. DATABASE CONNECTION
 try {
     // Connect to SQLite DB located in the parent folder
     $db = new SQLite3('../db/albuaves.db');
@@ -18,14 +13,12 @@ try {
     exit();
 }
 
-// 3. REQUEST HANDLING
 $method = $_SERVER['REQUEST_METHOD'];
-// Check if we are working with 'birds' or 'sightings' (Default: birds)
 $type = $_GET['type'] ?? 'birds';
 
 switch ($method) {
     
-    // --- READ DATA ---
+    // READ DATA
     case 'GET':
         if ($type === 'sightings') {
             // Fetch sightings and join with birds table to get the common name
@@ -47,9 +40,8 @@ switch ($method) {
         echo json_encode($data);
         break;
 
-    // --- CREATE DATA ---
+    // CREATE DATA
     case 'POST':
-        // Decode JSON input from request body
         $input = json_decode(file_get_contents('php://input'), true);
 
         if ($type === 'sightings') {
@@ -79,7 +71,7 @@ switch ($method) {
         }
         break;
 
-    // --- DELETE DATA ---
+    // DELETE DATA
     case 'DELETE':
         // Get ID from URL parameters
         $id = $_GET['id'] ?? null;
@@ -108,12 +100,10 @@ switch ($method) {
         }
         break;
         
-    // --- HANDLE OPTIONS (CORS preflight) ---
     case 'OPTIONS':
         http_response_code(200);
         break;
 }
 
-// Close database connection
 $db->close();
 ?>
