@@ -1,6 +1,6 @@
 ## Autor: Daniel Moret - DAM
 
-# 🦅 Proyecto Albuaves
+# Proyecto Albuaves
 
 ## 1. El código funcionando (Capturas)
 Se muestran aquí las capturas del correcto funcionamiento tanto de la parte Web como la parte Java.
@@ -18,7 +18,7 @@ Aquí se ve el cliente de escritorio (Java) conectándose a la misma API y mostr
 
 ---
 
-## ⚙️ Requisitos Previos
+## Requisitos Previos
 Para que los scripts funcionen correctamente en su máquina, debe tener instalado:
 1.  **PHP:** Disponible en el `PATH` de Windows (para ejecutar `php -S`).
 2.  **Java JDK:** Kit de desarrollo de Java instalado (para `javac`).
@@ -62,7 +62,7 @@ He preparado el script `run-api-server.bat`.
   * **Desde este PC:** `http://localhost:9191/index.html`
   * **Desde el Móvil/Red:** `http://TU_IP_LOCAL:9191/index.html` (Para saber tu IP, abre una terminal nueva y escribe el comando `ipconfig`).
 
-### 🌐 Acceso Remoto 
+### Acceso Remoto 
 Por defecto, el proyecto está configurado para funcionar en modo local (`localhost`). Si deseas acceder desde otro dispositivo (móvil, tablet) o ejecutar el cliente Java desde otro PC:
 
 1.  **Averigua tu IP:** Ejecuta `ipconfig` en una terminal.
