@@ -13,19 +13,17 @@ public class SearchBirdsAPI {
 
     public static void main(String[] args) {
         try {
-            // 1. CONFIGURACIÓN: IP de tu servidor (¡Asegúrate de que es correcta!)
+            // 1. CONFIGURACIÓN: IP de tu servidor
             String ip = "127.0.0.1"; 
             String port = "9191";
-            
-            // Puedes cambiar "?type=birds" por "?type=sightings" si quieres ver avistamientos
             String url = "http://" + ip + ":" + port + "/api.php?type=birds";
 
             System.out.println("Conectando a: " + url);
 
-            // 2. PETICIÓN HTTP (Estándar de Java)
+            // 2. PETICIÓN HTTP
             String jsonResponse = sendGETPetition(url);
 
-            // 3. PROCESAR DATOS (Sin librerías externas)
+            // 3. PROCESAR DATOS 
             if (jsonResponse.startsWith("[")) {
                 printBirdList(jsonResponse);
             } else {
@@ -37,7 +35,7 @@ public class SearchBirdsAPI {
         }
     }
 
-    // --- MÉTODO HTTP ESTÁNDAR ---
+    // MÉTODO HTTP ESTÁNDAR
     private static String sendGETPetition(String urlString) throws IOException {
         StringBuilder result = new StringBuilder();
         URL url = URI.create(urlString).toURL();
@@ -54,15 +52,14 @@ public class SearchBirdsAPI {
         return result.toString();
     }
 
-    // --- PARSER MANUAL (El truco para no usar .jar) ---
+    // PARSER MANUAL
     private static void printBirdList(String jsonArray) {
         // Limpiamos los corchetes del array [ ... ]
         String content = jsonArray.trim();
         if (content.startsWith("[")) content = content.substring(1);
         if (content.endsWith("]")) content = content.substring(0, content.length() - 1);
 
-        // Separamos por objetos. El truco es partir el string cada vez que vemos "},{"
-        // (Esto es básico, fallaría si el texto contiene esa cadena, pero para este proyecto sirve)
+        // Separamos por objetos
         String[] objects = content.split("\\},\\{");
 
         System.out.println("\n LISTA DE AVES");
@@ -71,16 +68,16 @@ public class SearchBirdsAPI {
         System.out.println("-------------------------------------------------------------------------");
 
         for (String obj : objects) {
-            // Limpiamos llaves extra si quedaron
+            // Limpiamos llaves extra
             obj = obj.replace("{", "").replace("}", "");
 
-            // Extraemos los valores usando un método auxiliar
+            // Extraemos los valores
             String id = extractValue(obj, "bird_id");
             String name = extractValue(obj, "common_name");
             String sci = extractValue(obj, "scientific_name");
             String img = extractValue(obj, "img_url");
             
-            // Convertimos Unicode (ej: \u00e1) a caracteres reales si hace falta
+            // Convertimos Unicodea caracteres reales
             name = decodeUnicode(name);
 
             // Imprimimos bonito
@@ -98,7 +95,6 @@ public class SearchBirdsAPI {
 
     // Busca un valor dentro del string estilo: "clave":"valor"
     private static String extractValue(String json, String key) {
-        // Regex: Busca "key":"(lo que sea)" o "key":(numero)
         Pattern p = Pattern.compile("\"" + key + "\":\"?(.*?)\"?(,|$)");
         Matcher m = p.matcher(json);
         if (m.find()) {
@@ -107,7 +103,7 @@ public class SearchBirdsAPI {
         return "N/A";
     }
 
-    // Utilidad para cortar textos largos
+    // utilidad para cortar textos largos 
     private static String truncate(String str, int width) {
         if (str.length() > width) {
             return str.substring(0, width - 3) + "...";
@@ -115,7 +111,7 @@ public class SearchBirdsAPI {
         return str;
     }
     
-    // Utilidad simple para acentos básicos en JSON
+    // utilidad simple para acentos básicos en JSON
     private static String decodeUnicode(String val) {
         return val.replace("\\u00e1", "á").replace("\\u00e9", "é")
                   .replace("\\u00ed", "í").replace("\\u00f3", "ó")
